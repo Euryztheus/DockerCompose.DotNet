@@ -118,4 +118,4 @@ networks:
 
 var lib = new ComposeLite(testfile);
 lib.ParseComposeFile();
-lib.ComposeUp();
+await lib.ComposeUp();

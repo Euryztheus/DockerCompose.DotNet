@@ -1,4 +1,5 @@
-﻿using Docker.DotNet;
+﻿using System.Threading.Tasks;
+using Docker.DotNet;
 using Docker.DotNet.Models;
 using DockerComposeLiteAPI.src.structure;
 using Newtonsoft.Json;
@@ -41,12 +42,12 @@ public class ComposeLite
     }//*/
   }
 
-  public void ComposeUp()
+  public async Task ComposeUp()
   {
     foreach (KeyValuePair<string, ServiceDefinition> ser in composeFile.Services)
     {
       // check/create networks
-      CreateNetwork();
+      await CreateNetwork();
       // check/create volumes
       // check/download images
       // create container
@@ -54,16 +55,21 @@ public class ComposeLite
     }
   }
 
-  public async void CreateNetwork()
+  public async Task CreateNetwork()
   {
-    IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters()
+    try
     {
-      Limit = 10,
-    });
+      var networks = await client.Networks.ListNetworksAsync(new NetworksListParameters());
 
-    foreach (var item in containers)
+      foreach (var item in networks)
+      {
+        Console.WriteLine(item.Name);
+      }
+    }
+    catch (Exception ex)
     {
-      Console.WriteLine(item);
+      Console.WriteLine(ex.ToString());
+      throw;
     }
 
     foreach (KeyValuePair<string, NetworkDefinition> net in composeFile.Networks)
