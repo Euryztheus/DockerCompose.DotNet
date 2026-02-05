@@ -1,6 +1,6 @@
 ﻿using DockerComposeLiteAPI;
 
-string file = """
+string arkfile = """
 version: "3.3"
 services:
   asa-server-1:
@@ -13,7 +13,7 @@ services:
     environment:
       - ASA_START_PARAMS=TheIsland_WP?listen?Port=7777?RCONPort=27020?RCONEnabled=True -WinLiveMaxPlayers=5 -NoBattlEye -mods=1434188,928793,1188679
       - ENABLE_DEBUG=0
-      #-clusterid=default -ClusterDirOverride="/home/gameserver/cluster-shared"
+      #-clusterid=default - ClusterDirOverride="/home/gameserver/cluster-shared"
     ports:
       # Game port for player connections through the server browser
       - 10.0.0.2:7777:7777/udp
@@ -32,7 +32,6 @@ services:
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv6.conf.default.disable_ipv6=1
-
   set-permissions-1:
     entrypoint: "/bin/bash -c 'chown -R 25000:25000 /steam ; chown -R 25000:25000 /steamcmd ; chown -R 25000:25000 /server-files ; chown -R 25000:25000 /cluster-shared'"
     user: root
@@ -96,6 +95,27 @@ networks:
 
 """;
 
+string testfile = """
+version: "3.8"
 
-var lib = new ComposeLiteAPI(file);
-lib.parseComposeFile();
+services:
+  app:
+    image: busybox:1.36
+    container_name: dcl_app
+    command: ["sh", "-c", "echo ok > /data/ok.txt; sleep 3600"]
+    volumes:
+      - dcl_data:/data:rw
+    networks:
+      - dcl_net
+
+volumes:
+  dcl_data: {}
+
+networks:
+  dcl_net:
+    driver: bridge
+""";
+
+var lib = new ComposeLite(testfile);
+lib.ParseComposeFile();
+lib.ComposeUp();
