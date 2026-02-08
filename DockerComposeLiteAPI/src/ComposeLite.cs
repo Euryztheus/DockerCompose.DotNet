@@ -57,24 +57,37 @@ public class ComposeLite
 
   public async Task CreateNetwork()
   {
-    try
-    {
-      var networks = await client.Networks.ListNetworksAsync(new NetworksListParameters());
+    var existingNetworks = await client.Networks.ListNetworksAsync(new NetworksListParameters());
+    var existingNetworksDict = existingNetworks.ToDictionary(n => n.Name, n => n);
 
-      foreach (var item in networks)
+    foreach (var (name, net) in composeFile.Networks)
+    {
+      if (existingNetworksDict.TryGetValue(name, out var n))
       {
-        Console.WriteLine(item.Name);
+        continue;
       }
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine(ex.ToString());
-      throw;
-    }
 
-    foreach (KeyValuePair<string, NetworkDefinition> net in composeFile.Networks)
-    {
-      Console.WriteLine();
+      //create network if not exist
+      var newNetwork = new NetworksCreateParameters
+      {
+        Name = name,
+        Driver = net.Driver ?? "bridge",
+        Attachable = net.Attachable ?? true,
+        Options = net.DriverOpts
+      };
+      if (net.EnableIpv6.HasValue)
+        newNetwork.EnableIPv6 = net.EnableIpv6.Value;
+
+      if (net.Ipam?.Config is { Count: > 0 } pools)
+      {
+        newNetwork.IPAM = new IPAM
+        {
+          Config = pools.Select(p => new IPAMConfig { Subnet = p.Subnet }).ToList()
+        };
+      }
+
+      Console.WriteLine($"creating network: {newNetwork.Name}");
+      await client.Networks.CreateNetworkAsync(newNetwork);
     }
   }
 }
