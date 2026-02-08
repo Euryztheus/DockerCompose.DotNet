@@ -12,12 +12,15 @@ public class ComposeLite
   private readonly string composeFileString;
   private ComposeFileDefinition composeFile;
   private readonly DockerClient client;
-  public ComposeLite(string composeFileString)
+  private readonly TextWriter log;
+  public ComposeLite(string composeFileString, TextWriter? log = null)
   {
     this.composeFileString = composeFileString;
     this.client = new DockerClientConfiguration(
         new Uri("unix:///var/run/docker.sock"))
          .CreateClient();
+
+    this.log = log ?? Console.Out;
   }
 
   public void ParseComposeFile()
@@ -64,10 +67,12 @@ public class ComposeLite
     {
       if (existingNetworksDict.TryGetValue(name, out var n))
       {
+        log.WriteLine($"Network {name} already exists");
         continue;
       }
 
       //create network if not exist
+      log.WriteLine($"Network {name} will be created");
       var newNetwork = new NetworksCreateParameters
       {
         Name = name,
@@ -86,8 +91,8 @@ public class ComposeLite
         };
       }
 
-      Console.WriteLine($"creating network: {newNetwork.Name}");
       await client.Networks.CreateNetworkAsync(newNetwork);
+      log.WriteLine($"Network {name} created successfully");
     }
   }
 }
