@@ -109,7 +109,8 @@ services:
       - dcl_net
 
 volumes:
-  dcl_data: {}
+  dcl_data:
+#    external: true
 
 networks:
   dcl_net:

@@ -50,15 +50,21 @@ public class ComposeLite
     foreach (KeyValuePair<string, ServiceDefinition> ser in composeFile.Services)
     {
       // check/create networks
-      await CreateNetwork();
+      await CreateNetworks();
       // check/create volumes
+      await CreateVolumes();
       // check/download images
       // create container
       // connect container to network
     }
   }
 
-  public async Task CreateNetwork()
+  public async Task ComposeDown()
+  {
+
+  }
+
+  public async Task CreateNetworks()
   {
     var existingNetworks = await client.Networks.ListNetworksAsync(new NetworksListParameters());
     var existingNetworksDict = existingNetworks.ToDictionary(n => n.Name, n => n);
@@ -93,6 +99,39 @@ public class ComposeLite
 
       await client.Networks.CreateNetworkAsync(newNetwork);
       log.WriteLine($"Network {name} created successfully");
+    }
+  }
+
+  public async Task CreateVolumes()
+  {
+    var existingVolumes = await client.Volumes.ListAsync(new VolumesListParameters());
+    var existingVolumesDict = existingVolumes.Volumes.ToDictionary(n => n.Name, n => n);
+
+    foreach (var (name, volDef) in composeFile.Volumes)
+    {
+      var vol = volDef ?? new VolumeDefinition();
+      if (vol.External == true)
+      {
+        log.WriteLine($"Volume {name} is external, wont create");
+        continue;
+      }
+      if (existingVolumesDict.TryGetValue(name, out var v))
+      {
+        log.WriteLine($"Volume {name} already exists, wont create");
+        continue;
+      }
+
+      log.WriteLine($"Volume {name} will be created");
+      var newVolume = new VolumesCreateParameters
+      {
+        Name = name,
+        Driver = vol.Driver,
+        DriverOpts = vol.DriverOpts,
+        Labels = vol.Labels
+      };
+
+      await client.Volumes.CreateAsync(newVolume);
+      log.WriteLine($"Volume {name} created successfully");
     }
   }
 }
