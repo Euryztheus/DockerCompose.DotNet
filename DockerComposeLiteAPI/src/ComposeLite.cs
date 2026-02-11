@@ -54,14 +54,34 @@ public class ComposeLite
       // check/create volumes
       await CreateVolumes();
       // check/download images
+      await GetImages();
       // create container
       // connect container to network
+      log.WriteLine("ComposeLite: Compose up complete");
     }
   }
 
   public async Task ComposeDown()
   {
 
+  }
+
+  public async Task GetImages()
+  {
+    foreach (var (name, service) in composeFile.Services)
+    {
+      string image = service.Image ?? "";
+      //await client.Images.InspectImageAsync(image);
+      await client.Images.CreateImageAsync(
+        new ImagesCreateParameters { FromImage = image },
+        authConfig: null,
+        progress: new Progress<JSONMessage>(m =>
+        {
+          if (!string.IsNullOrWhiteSpace(m.Status))
+            log.WriteLine($"{image}: {m.Status} {m.ProgressMessage}".Trim());
+        })
+      );
+    }
   }
 
   public async Task CreateNetworks()
