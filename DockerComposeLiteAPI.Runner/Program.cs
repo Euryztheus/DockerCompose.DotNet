@@ -117,6 +117,6 @@ networks:
     driver: bridge
 """;
 
-var lib = new ComposeLite(testfile);
+var lib = new ComposeLite(testfile, "composelite_test");
 lib.ParseComposeFile();
 await lib.ComposeUp();
