@@ -60,7 +60,7 @@ public class ComposeLite
       // check/download images
       await GetImages();
       // create container
-      CreateContainer();
+      await CreateContainer();
       // connect container to network
 
 
@@ -70,12 +70,47 @@ public class ComposeLite
 
   public async Task ComposeDown()
   {
-
+    // stop and remove containers
+    // remove networks
+    // -v, --volumes remove volumes
+    // --rmi remove images
   }
 
   public async Task CreateContainer()
   {
+    var existingContainers = await client.Containers.ListContainersAsync(new ContainersListParameters { All = true });
+    foreach (var (name, service) in composeFile.Services)
+    {
+      var existingContainer = existingContainers.FirstOrDefault(c => c.Names.Any(n => n.TrimStart('/') == PrefixName(service.ContainerName)));
+      if (existingContainer != null)
+      {
+        log.WriteLine($"Container {PrefixName(service.ContainerName)} already exists");
+        await client.Containers.StartContainerAsync(existingContainer.ID, new ContainerStartParameters());
+        log.WriteLine($"Container {PrefixName(service.ContainerName)} has been started");
+        continue;
+      }
 
+      // TODO: config (ports, sysctl)
+
+      var newContainer = new CreateContainerParameters
+      {
+        Hostname = service.Hostname,
+        Name = PrefixName(service.ContainerName),
+        //Entrypoint = service.Entrypoint, // should be IList<string>
+        User = service.User,
+        Image = service.Image,
+        Tty = service.Tty,
+        Env = service.Environment,
+        Cmd = ["sh", "-c", "sleep 3600"], // test so dont exist instantly, TODO: change to real
+        //depends on?
+        // Volumes = service.Volumes, // wrong type
+      };
+
+      var created = await client.Containers.CreateContainerAsync(newContainer);
+      log.WriteLine($"Container {PrefixName(service.ContainerName)} has been created");
+      await client.Containers.StartContainerAsync(created.ID, new ContainerStartParameters());
+      log.WriteLine($"Container {PrefixName(service.ContainerName)} has been started");
+    }
   }
 
   public async Task GetImages()
@@ -103,17 +138,17 @@ public class ComposeLite
 
     foreach (var (name, net) in composeFile.Networks)
     {
-      if (existingNetworksDict.TryGetValue(prefixName(name), out var n))
+      if (existingNetworksDict.TryGetValue(PrefixName(name), out var n))
       {
-        log.WriteLine($"Network {prefixName(name)} already exists");
+        log.WriteLine($"Network {PrefixName(name)} already exists");
         continue;
       }
 
       //create network if not exist
-      log.WriteLine($"Network {prefixName(name)} will be created");
+      log.WriteLine($"Network {PrefixName(name)} will be created");
       var newNetwork = new NetworksCreateParameters
       {
-        Name = prefixName(name),
+        Name = PrefixName(name),
         Driver = net.Driver ?? "bridge",
         Attachable = net.Attachable ?? true,
         Options = net.DriverOpts
@@ -130,7 +165,7 @@ public class ComposeLite
       }
 
       await client.Networks.CreateNetworkAsync(newNetwork);
-      log.WriteLine($"Network {prefixName(name)} created successfully");
+      log.WriteLine($"Network {PrefixName(name)} created successfully");
     }
   }
 
@@ -144,32 +179,32 @@ public class ComposeLite
       var vol = volDef ?? new VolumeDefinition();
       if (vol.External == true)
       {
-        log.WriteLine($"Volume {prefixName(name)} is external, wont create");
+        log.WriteLine($"Volume {PrefixName(name)} is external, wont create");
         continue;
       }
-      if (existingVolumesDict.TryGetValue(prefixName(name), out var v))
+      if (existingVolumesDict.TryGetValue(PrefixName(name), out var v))
       {
-        log.WriteLine($"Volume {prefixName(name)} already exists, wont create");
+        log.WriteLine($"Volume {PrefixName(name)} already exists, wont create");
         continue;
       }
 
-      log.WriteLine($"Volume {prefixName(name)} will be created");
+      log.WriteLine($"Volume {PrefixName(name)} will be created");
       var newVolume = new VolumesCreateParameters
       {
-        Name = prefixName(name),
+        Name = PrefixName(name),
         Driver = vol.Driver,
         DriverOpts = vol.DriverOpts,
         Labels = vol.Labels
       };
 
       await client.Volumes.CreateAsync(newVolume);
-      log.WriteLine($"Volume {prefixName(name)} created successfully");
+      log.WriteLine($"Volume {PrefixName(name)} created successfully");
     }
   }
 
 
   // Helper Methods
-  private string prefixName(string key)
+  private string PrefixName(string? key = "")
   {
     return projectName + "_" + key;
   }
