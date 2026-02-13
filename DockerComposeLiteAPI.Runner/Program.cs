@@ -119,6 +119,7 @@ networks:
 
 var lib = new ComposeLite(testfile, "composelite_test");
 lib.ParseComposeFile();
-//await lib.ComposeUp();
+await lib.ComposeUp();
+Console.WriteLine();
 
 await lib.ComposeDown();

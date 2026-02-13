@@ -110,9 +110,18 @@ public class ComposeLite
         log.WriteLine($"Issue: Network {PrefixName(name)} does not exist");
         continue;
       }
-      // TODO: check if network is being used
-      await client.Networks.DeleteNetworkAsync(PrefixName(name));
-      log.WriteLine($"Network {PrefixName(name)} has been removed");
+      if (net.External == true)
+        continue;
+
+      try
+      {
+        await client.Networks.DeleteNetworkAsync(PrefixName(name));
+        log.WriteLine($"Network {PrefixName(name)} has been removed");
+      }
+      catch (Exception e)
+      {
+        log.WriteLine($"Removing Network {PrefixName(name)} has failed");
+      }
     }
   }
 
