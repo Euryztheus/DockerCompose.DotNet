@@ -26,6 +26,9 @@ public class ServiceDefinition
   [JsonProperty("environment")]
   public List<string> Environment { get; set; } = new();
 
+  [JsonProperty("command")]
+  public List<string>? Command { get; set; } = new();
+
   [JsonProperty("ports")]
   public List<string> Ports { get; set; } = new();
 
