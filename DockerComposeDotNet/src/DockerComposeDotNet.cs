@@ -5,13 +5,13 @@ using System.Threading.Tasks.Dataflow;
 using System.Xml.Xsl;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using DockerComposeLiteAPI.src.structure;
+using DockerComposeDotNet.src.structure;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
-namespace DockerComposeLiteAPI;
+namespace DockerComposeDotNet;
 
-public class ComposeLite
+public class DockerComposeDotNet
 {
   private readonly string composeFileString;
   private ComposeFileDefinition composeFile;
@@ -19,7 +19,7 @@ public class ComposeLite
   private readonly TextWriter log;
   private readonly string projectName;
 
-  public ComposeLite(string composeFileString, string? projectName = "", TextWriter? log = null)
+  public DockerComposeDotNet(string composeFileString, string? projectName = "", TextWriter? log = null)
   {
     this.composeFileString = composeFileString;
     this.client = new DockerClientConfiguration(
@@ -67,7 +67,7 @@ public class ComposeLite
       // connect container to network
 
 
-      log.WriteLine("ComposeLite: Compose up complete");
+      log.WriteLine("DockerComposeDotNet: Compose up complete");
     }
   }
 

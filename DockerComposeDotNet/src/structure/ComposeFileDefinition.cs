@@ -1,7 +1,7 @@
-using DockerComposeLiteAPI.src.structure;
+using DockerComposeDotNet.src.structure;
 using Newtonsoft.Json;
 
-namespace DockerComposeLiteAPI.src.structure;
+namespace DockerComposeDotNet.src.structure;
 
 public class ComposeFileDefinition
 {

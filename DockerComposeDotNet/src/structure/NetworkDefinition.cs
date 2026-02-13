@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace DockerComposeLiteAPI.src.structure;
+namespace DockerComposeDotNet.src.structure;
 
 public class NetworkDefinition
 {

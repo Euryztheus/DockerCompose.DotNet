@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DockerComposeDotNet.Runner/DockerComposeDotNet.Runner.csproj" />
+  <Project Path="DockerComposeDotNet/DockerComposeDotNet.csproj" />
+</Solution>

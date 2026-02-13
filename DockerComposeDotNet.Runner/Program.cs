@@ -1,4 +1,4 @@
-﻿using DockerComposeLiteAPI;
+﻿using DockerComposeDotNet;
 
 string arkfile = """
 version: "3.3"
@@ -120,8 +120,9 @@ networks:
     driver: bridge
 """;
 
-var lib = new ComposeLite(testfile, "composelite_test");
+var lib = new DockerComposeDotNet.DockerComposeDotNet(testfile, "composeup_test");
 lib.ParseComposeFile();
+await lib.ComposeDown();
 await lib.ComposeUp();
 Console.WriteLine();
 
