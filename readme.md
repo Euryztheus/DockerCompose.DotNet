@@ -10,11 +10,13 @@ using DockerComposeDotNet;
 
 var yaml = File.ReadAllText("docker-compose.yml");
 
-var dcdn = new DockerComposeDotNet.DockerComposeDotNet(
+var dcdn = new DockerComposeDotNet(
   yaml,
   projectName: "demo",
   log: Console.Out
 );
+// alternative
+// var dcdn = new DockerComposeDotNet(yaml);
 
 dcdn.ParseComposeFile();
 await dcdn.ComposeUp();
