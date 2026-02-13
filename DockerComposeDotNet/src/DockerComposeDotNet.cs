@@ -54,21 +54,17 @@ public class DockerComposeDotNet
 
   public async Task ComposeUp()
   {
-    foreach (KeyValuePair<string, ServiceDefinition> ser in composeFile.Services)
-    {
-      // check/create networks
-      await CreateNetworks();
-      // check/create volumes
-      await CreateVolumes();
-      // check/download images
-      await GetImages();
-      // create container
-      await CreateContainer();
-      // connect container to network
+    // check/create networks
+    await CreateNetworks();
+    // check/create volumes
+    await CreateVolumes();
+    // check/download images
+    await GetImages();
+    // create container
+    await CreateContainers();
+    // connect container to network
 
-
-      log.WriteLine("DockerComposeDotNet: Compose up complete");
-    }
+    log.WriteLine("DockerComposeDotNet: Compose up complete");
   }
 
   public async Task ComposeDown()
@@ -137,7 +133,7 @@ public class DockerComposeDotNet
 
   }
 
-  public async Task CreateContainer()
+  public async Task CreateContainers()
   {
     var existingContainers = await client.Containers.ListContainersAsync(new ContainersListParameters { All = true });
     foreach (var (name, service) in composeFile.Services)
