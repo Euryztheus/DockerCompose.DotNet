@@ -107,6 +107,9 @@ services:
       - dcl_data:/data:rw
     networks:
       - dcl_net
+    ports:
+      - 0.0.0.0:7777:7777/udp
+      - 0.0.0.0:27020:27020/tcp
 
 volumes:
   dcl_data:
@@ -122,4 +125,4 @@ lib.ParseComposeFile();
 await lib.ComposeUp();
 Console.WriteLine();
 
-await lib.ComposeDown();
+//await lib.ComposeDown();
